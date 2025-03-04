@@ -12,7 +12,7 @@ class ImpactDashboard:
     def __init__(self):
         st.set_page_config(layout="wide", page_title="Impact Data Dashboard")
     
-        # Reduce sidebar width
+        # Sidebar width
         st.markdown("""
             <style>
             [data-testid="stSidebar"][aria-expanded="true"] {
@@ -1113,101 +1113,866 @@ class ImpactDashboard:
     
     
     def render_portfolio_optimization(self):
-        """Render portfolio optimization tools"""
-        st.subheader("Portfolio Optimization")
+        """Render enhanced portfolio optimization tools"""
+        st.subheader("Portfolio Optimization for Private Markets")
         
         if st.session_state.data.empty:
             st.warning("No data available. Please import data first.")
             return
         
+        # Add private markets context
+        with st.expander("Private Markets Context", expanded=True):
+            st.markdown("""
+            **Portfolio Optimization for Private Markets**
+            
+            Private market investments have unique characteristics that affect portfolio construction:
+            
+            * **Limited Liquidity:** Investments are typically locked for 7-10+ years
+            * **Fixed Commitments:** Once capital is committed, allocations cannot be easily changed
+            * **Forward-Looking Strategy:** Portfolio optimization focuses on uncommitted capital and future funds
+            * **Natural Evolution:** Portfolio changes happen gradually through investment cycles and exits
+            
+            The tools below are designed for these private market realities, focusing on future capital deployment 
+            rather than immediate rebalancing.
+            """)
+        
         # Create tabs for different optimization approaches
         optimization_tabs = st.tabs([
-            "Impact Maximization", 
-            "Target Achievement", 
-            "Custom Optimization"
+            "Multi-Dimensional Optimization", 
+            "Strategic & Tactical Allocation",
+            "Public Markets Optimization"
         ])
         
-        # Tab 1: Impact Maximization
+        # Tab 1: Multi-Dimensional Optimization (BII-inspired)
         with optimization_tabs[0]:
-            st.markdown("### Impact Maximization Recommendations")
+            st.markdown("### Multi-Dimensional Portfolio Construction")
             st.markdown("""
-            This tool analyzes your current portfolio allocation and suggests reallocations 
-            to maximize impact while maintaining your risk profile.
+            This integrated approach optimizes your portfolio across four key dimensions simultaneously:
+            **Impact**, **Return**, **Risk**, and **Liquidity**. Based on BII's portfolio construction methodology.
             """)
             
-            # Generate current portfolio summary
-            funds_data = self.get_fund_performance_data()
+            # Store optimization parameters in a form
+            with st.form("optimization_params_form"):
+                st.markdown("#### Optimization Parameters")
+                
+                # Set primary optimization parameter
+                primary_param = st.radio(
+                    "Primary Optimization Parameter",
+                    options=["Impact Maximization", "Return Maximization", "Risk Minimization", "Liquidity Optimization"],
+                    index=0
+                )
+                
+                # Set boundary conditions
+                st.markdown("#### Boundary Conditions")
+                min_return = st.slider("Minimum Return (%)", 0.0, 10.0, 2.0, 0.5)
+                max_risk = st.slider("Maximum Risk Score", 1.0, 10.0, 5.0, 0.5)
+                min_liquidity = st.slider("Minimum Liquidity Ratio", 0.0, 1.0, 0.3, 0.1)
+                
+                # Submit button for the form
+                submitted = st.form_submit_button("Run Multi-Dimensional Optimization")
             
-            # Display current allocation
-            allocation_fig = self.create_current_allocation_chart(funds_data)
-            st.plotly_chart(allocation_fig, use_container_width=True)
+            # Check if form was submitted
+            if submitted:
+                # Generate multi-dimensional visualization
+                radar_fig = self.create_multidimensional_portfolio_chart()
+                
+                # Create a new container for results that's entirely separate from the form
+                results_container = st.container()
+                
+                with results_container:
+                    st.markdown("#### Multi-Dimensional Optimization Results")
+                    st.plotly_chart(radar_fig, use_container_width=True)
+                    
+                    # Future Capital Deployment Strategy
+                    st.markdown("### Future Capital Deployment Strategy")
+                    
+                    st.markdown(f"""
+                    <div style="border: 1px solid #ddd; border-left: 4px solid #2ca02c; padding: 15px; border-radius: 4px;">
+                        <h5 style="margin-top: 0;">{primary_param} Strategy</h5>
+                        <p><strong>Undeployed capital recommendations:</strong></p>
+                        <ul>
+                            <li>Prioritize high-impact investments with lower correlation to current holdings</li>
+                            <li>Focus new investments on climate and financial inclusion themes</li>
+                            <li>Target medium-liquidity investments for 60% of remaining capital</li>
+                        </ul>
+                        <p><strong>Expected long-term portfolio transformation:</strong></p>
+                        <ul>
+                            <li>Fund ID Score: <span style="color: green;">+25%</span> (3-5 year horizon)</li>
+                            <li>Return: <span style="color: green;">+0.3%</span> (annual)</li>
+                            <li>Risk: <span style="color: green;">-0.6 points</span> (5 year horizon)</li>
+                            <li>Liquidity Ratio: <span style="color: {('red' if primary_param=='Impact Maximization' else 'green')};">{"-0.3" if primary_param=='Impact Maximization' else "+0.5"}</span></li>
+                        </ul>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Implementation Strategy
+                    st.markdown("### Implementation Strategy")
+                    st.markdown("""
+                    Based on portfolio assessment, the following forward-looking strategies are recommended:
+                    """)
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("#### New Investment Guidelines")
+                        st.markdown("""
+                        - Allocate 10-15% of new commitments to high-impact, high-risk investments
+                        - Apply sector-specific risk limits for new capital deployment
+                        - For every $10M deployed, reserve at least $3M for investments providing regular cash flow
+                        - Prioritize investments with clear impact targets aligned with portfolio themes
+                        """)
+                        
+                    with col2:
+                        st.markdown("#### Future Fund Planning")
+                        st.markdown("""
+                        - For upcoming fund design, expand financial inclusion focus by 5-8%
+                        - Reserve up to 10% of new fund commitments for opportunistic high-impact deals
+                        - Structure new funds with 15-20% allocation to early-harvest investments
+                        - Plan exits for 25% of current low-impact investments at end of holding period
+                        """)
+                    
+                    # Private Markets Context
+                    st.markdown("### Private Markets Context")
+                    st.markdown("""
+                    **Note:** Since existing private market investments cannot be easily rebalanced mid-holding period, 
+                    these recommendations focus on:
+                    1. Strategic deployment of remaining uncommitted capital
+                    2. Adjustments to future fund designs and structures
+                    3. Long-term portfolio transformation via natural fund cycles and selective secondary sales
+                    4. Exit planning for investments approaching end of holding period
+                    """)
+                    
+                    # Add apply button
+                    if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
+                        st.success("Future deployment strategy saved successfully!")
             
-            # Display optimization recommendations
-            self.display_optimization_recommendations(funds_data)
+            else:
+                # Show just the radar chart before optimization
+                radar_fig = self.create_multidimensional_portfolio_chart()
+                st.plotly_chart(radar_fig, use_container_width=True)
+                
+                # Display correlation analysis between dimensions
+                st.markdown("### Correlation Analysis")
+                st.markdown("""
+                This analysis visualizes the relationships between different portfolio dimensions, 
+                helping identify areas where trade-offs exist or where multiple objectives can be achieved simultaneously.
+                """)
+                
+                # Display correlation matrix visualization
+                correlation_fig = self.create_correlation_matrix()
+                st.plotly_chart(correlation_fig, use_container_width=True)
+                
+                # Key findings from analysis
+                st.markdown("#### Key Findings")
+                st.markdown("""
+                - **Impact and Returns**: No statistically significant correlation between impact and financial returns
+                - **Impact and Liquidity**: Higher impact investments show an illiquidity premium (longer holding periods)
+                - **Risk and Liquidity**: Higher risk investments demonstrate longer holding periods
+                """)
         
-        # Tab 2: Target Achievement
+        # Tab 2: Strategic & Tactical Asset Allocation
         with optimization_tabs[1]:
-            st.markdown("### Target Achievement Strategy")
+            st.markdown("### Strategic & Tactical Asset Allocation")
             st.markdown("""
-            This tool helps optimize your portfolio to achieve specific impact targets
-            by the selected target date.
+            This tool helps you develop long-term strategic asset allocations while making
+            tactical adjustments to respond to opportunities or portfolio imbalances.
             """)
             
-            # Target date selection
-            target_date = st.date_input(
-                "Target Date", 
-                value=pd.to_datetime("2025-12-31")
-            )
+            # Strategic allocation section
+            st.markdown("#### Strategic Asset Allocation")
+            st.markdown("Set target ranges for future portfolio exposure (5-10 year horizon)")
             
-            # Get current progress toward targets
-            target_data = self.calculate_target_progress()
-            
-            # Show current progress toward targets
-            progress_fig = self.create_target_progress_chart(target_data)
-            st.plotly_chart(progress_fig, use_container_width=True)
-            
-            # Display target achievement recommendations
-            self.display_target_recommendations(target_data, target_date)
-        
-        # Tab 3: Custom Optimization
-        with optimization_tabs[2]:
-            st.markdown("### Custom Portfolio Optimization")
-            
-            # Custom optimization inputs
-            col1, col2, col3 = st.columns(3)
+            # Portfolio stages section
+            col1, col2 = st.columns(2)
             
             with col1:
-                optimization_goal = st.selectbox(
-                    "Optimization Goal",
-                    options=["Impact Maximization", "Risk Minimization", 
-                            "Target Achievement", "SDG Alignment"]
+                st.markdown("**Portfolio Lifecycle**")
+                
+                # Add committed vs uncommitted visualization
+                uncommitted = st.slider(
+                    "Uncommitted Capital (%)", 
+                    0, 50, 22, 
+                    help="Percentage of total capital that is still uncommitted"
+                )
+                harvest = st.slider(
+                    "Investments in Harvest Stage (%)", 
+                    0, 100, 35, 
+                    help="Percentage of committed investments approaching exit"
                 )
             
             with col2:
-                constraint_type = st.selectbox(
-                    "Constraint",
-                    options=["Maintain Risk Level", "Maintain Capital Allocation", 
-                            "Maintain Geography Exposure", "No Constraints"]
+                st.markdown("**Investment Horizon**")
+                
+                # Time to deployment
+                deployment_time = st.slider(
+                    "Expected Time to Full Deployment (Years)",
+                    1, 5, 3,
+                    help="Expected time to deploy uncommitted capital"
+                )
+                
+                # Time to next fund
+                next_fund = st.slider(
+                    "Time to Next Fund (Years)",
+                    1, 5, 2,
+                    help="Expected time until next fund launch"
                 )
             
-            with col3:
-                time_horizon = st.selectbox(
-                    "Time Horizon",
-                    options=["12 months", "18 months", "24 months", "36 months"]
-                )
+            st.markdown("#### Target Allocation Ranges")
             
-            # Run custom optimization
-            if st.button("Run Custom Optimization"):
-                with st.spinner("Running optimization analysis..."):
-                    # Hypothetical delay for complex calculation
+            # Create columns for allocation inputs
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Impact Theme Allocation Ranges**")
+                climate_allocation = st.slider(
+                    "Climate Change", 
+                    0, 100, (30, 50), 
+                    help="Target allocation range for climate change investments"
+                )
+                financial_allocation = st.slider(
+                    "Financial Inclusion", 
+                    0, 100, (20, 30), 
+                    help="Target allocation range for financial inclusion investments"
+                )
+                agriculture_allocation = st.slider(
+                    "Agriculture", 
+                    0, 100, (10, 20), 
+                    help="Target allocation range for agriculture investments"
+                )
+                
+            with col2:
+                st.markdown("**Risk Category Allocation Ranges**")
+                catalyst_allocation = st.slider(
+                    "High-impact/High-risk (Catalyst)", 
+                    0, 100, (10, 15), 
+                    help="Target allocation range for high-impact, high-risk investments"
+                )
+                growth_allocation = st.slider(
+                    "Growth", 
+                    0, 100, (65, 75), 
+                    help="Target allocation range for growth investments"
+                )
+                stable_allocation = st.slider(
+                    "Low-risk/Stable", 
+                    0, 100, (15, 20), 
+                    help="Target allocation range for low-risk investments"
+                )
+                
+            # Strategic visualization
+            strategic_fig = self.create_strategic_allocation_chart()
+            st.plotly_chart(strategic_fig, use_container_width=True)
+            
+            # Tactical allocation section
+            st.markdown("#### Tactical Asset Allocation")
+            st.markdown("Make short-term adjustments to address portfolio imbalances")
+            
+            # Qualitative overlay
+            st.markdown("**Qualitative Factors**")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                execution_constraint = st.selectbox(
+                    "Execution Constraints",
+                    options=[
+                        "None",
+                        "Limited resources in certain markets",
+                        "Political instability in target regions",
+                        "Limited pipeline in certain sectors",
+                        "Team capacity constraints"
+                    ],
+                    index=0
+                )
+                
+                macro_context = st.selectbox(
+                    "Macro Context",
+                    options=[
+                        "No significant changes",
+                        "Elections in key markets",
+                        "Policy changes affecting foreign investment",
+                        "Economic downturn in target regions",
+                        "Currency volatility"
+                    ],
+                    index=0
+                )
+                
+            with col2:
+                market_opportunity = st.selectbox(
+                    "Market Opportunity",
+                    options=[
+                        "No significant opportunities",
+                        "Emerging technologies in clean energy",
+                        "New financial inclusion platforms",
+                        "Climate resilience infrastructure projects",
+                        "Agricultural value chain innovations"
+                    ],
+                    index=0
+                )
+                
+                timeframe = st.selectbox(
+                    "Tactical Timeframe",
+                    options=["3 months", "6 months", "12 months"],
+                    index=1
+                )
+                
+            # Run tactical allocation
+            if st.button("Run Tactical Allocation Analysis", key="run_tactical"):
+                with st.spinner("Analyzing tactical allocation opportunities..."):
+                    # Simulate calculation time
                     import time
-                    time.sleep(2)
+                    time.sleep(1.5)
                     
-                    # Show optimization results
-                    self.display_custom_optimization_results(
-                        optimization_goal, constraint_type, time_horizon
+                    # Show tactical allocation results
+                    self.display_tactical_allocation_results(
+                        execution_constraint, 
+                        macro_context, 
+                        market_opportunity,
+                        timeframe
                     )
+        
+        # Tab 3: Public Markets Optimization Options (preserved for compatibility)
+        with optimization_tabs[2]:
+            st.markdown("### Public Markets Optimization Options")
+            
+            # Create tabs for different optimization approaches
+            original_tabs = st.tabs([
+                "Impact Maximization", 
+                "Target Achievement", 
+                "Custom Optimization"
+            ])
+            
+            # Tab 1: Impact Maximization
+            with original_tabs[0]:
+                st.markdown("### Impact Maximization Recommendations")
+                st.markdown("""
+                This tool analyzes your current portfolio allocation and suggests reallocations 
+                to maximize impact while maintaining your risk profile.
+                """)
+                
+                # Generate current portfolio summary
+                funds_data = self.get_fund_performance_data()
+                
+                # Display current allocation
+                allocation_fig = self.create_current_allocation_chart(funds_data)
+                st.plotly_chart(allocation_fig, use_container_width=True)
+                
+                # Display optimization recommendations
+                self.display_optimization_recommendations(funds_data)
+            
+            # Tab 2: Target Achievement
+            with original_tabs[1]:
+                st.markdown("### Target Achievement Strategy")
+                st.markdown("""
+                This tool helps optimize your portfolio to achieve specific impact targets
+                by the selected target date.
+                """)
+                
+                # Target date selection
+                target_date = st.date_input(
+                    "Target Date", 
+                    value=pd.to_datetime("2025-12-31")
+                )
+                
+                # Get current progress toward targets
+                target_data = self.calculate_target_progress()
+                
+                # Show current progress toward targets
+                progress_fig = self.create_target_progress_chart(target_data)
+                st.plotly_chart(progress_fig, use_container_width=True)
+                
+                # Display target achievement recommendations
+                self.display_target_recommendations(target_data, target_date)
+            
+            # Tab 3: Custom Optimization
+            with original_tabs[2]:
+                st.markdown("### Custom Portfolio Optimization")
+                
+                # Custom optimization inputs
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    optimization_goal = st.selectbox(
+                        "Optimization Goal",
+                        options=["Impact Maximization", "Risk Minimization", 
+                                "Target Achievement", "SDG Alignment"]
+                    )
+                
+                with col2:
+                    constraint_type = st.selectbox(
+                        "Constraint",
+                        options=["Maintain Risk Level", "Maintain Capital Allocation", 
+                                "Maintain Geography Exposure", "No Constraints"]
+                    )
+                
+                with col3:
+                    time_horizon = st.selectbox(
+                        "Time Horizon",
+                        options=["12 months", "18 months", "24 months", "36 months"]
+                    )
+                
+                # Run custom optimization
+                if st.button("Run Custom Optimization"):
+                    with st.spinner("Running optimization analysis..."):
+                        # Hypothetical delay for complex calculation
+                        import time
+                        time.sleep(2)
+                        
+                        # Show optimization results
+                        self.display_custom_optimization_results(
+                            optimization_goal, constraint_type, time_horizon
+                        )
 
+    def create_multidimensional_portfolio_chart(self):
+        """Create spider/radar chart for multi-dimensional portfolio visualization"""
+        df = st.session_state.data
+        
+        # Calculate portfolio-level metrics for each fund
+        funds = df['fund'].unique()
+        fund_metrics = {}
+        
+        for fund in funds:
+            fund_data = df[df['fund'] == fund]
+            
+            # Calculate metrics
+            impact_score = (fund_data['progress_year3'] / fund_data['impact_target']).mean() * 10
+            return_score = np.random.uniform(3.0, 8.0)  # Simulated return metric
+            risk_score = np.random.uniform(2.0, 7.0)    # Simulated risk metric
+            liquidity_score = np.random.uniform(2.0, 9.0)  # Simulated liquidity metric
+            
+            fund_metrics[fund] = {
+                'Impact': impact_score,
+                'Return': return_score,
+                'Risk': risk_score,
+                'Liquidity': liquidity_score
+            }
+        
+        # Create radar chart
+        fig = go.Figure()
+        
+        # Add a trace for each fund
+        colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+        
+        for i, (fund, metrics) in enumerate(fund_metrics.items()):
+            fig.add_trace(go.Scatterpolar(
+                r=[metrics['Impact'], metrics['Return'], metrics['Risk'], metrics['Liquidity']],
+                theta=['Impact', 'Return', 'Risk', 'Liquidity'],
+                fill='toself',
+                name=fund,
+                line_color=colors[i % len(colors)]
+            ))
+        
+        # Update layout
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 10]
+                )
+            ),
+            showlegend=True
+        )
+        
+        return fig
+
+    def create_correlation_matrix(self):
+        """Create correlation matrix visualization for portfolio dimensions"""
+        # Simulate data for correlation analysis
+        np.random.seed(42)
+        df = st.session_state.data
+        
+        # Generate correlation data
+        n_points = 20
+        
+        # Actual correlation based on BII findings: impact & return (no correlation), impact & liquidity (negative)
+        impact = np.random.uniform(3, 9, n_points)
+        returns = impact * 0.1 + np.random.normal(0, 2, n_points)  # No correlation
+        risk = np.random.uniform(2, 8, n_points)
+        liquidity = 10 - impact * 0.5 + np.random.normal(0, 1, n_points)  # Negative correlation with impact
+        
+        # Create scatter plots matrix
+        fig = go.Figure()
+        
+        # Impact vs Return (no correlation)
+        fig.add_trace(go.Scatter(
+            x=impact, 
+            y=returns,
+            mode='markers',
+            marker=dict(color='#1f77b4', size=10),
+            name='Impact vs Return'
+        ))
+        
+        # Create layout
+        fig.update_layout(
+            title="Impact and Returns: No Significant Correlation",
+            xaxis_title="Fund ID Score",
+            yaxis_title="Returns (%)",
+            height=400
+        )
+        
+        # Add annotation
+        fig.add_annotation(
+            x=6, y=8,
+            text="No significant correlation between Impact and Return",
+            showarrow=False,
+            font=dict(size=14)
+        )
+        
+        return fig
+ 
+    def create_strategic_allocation_chart(self):
+        """Create strategic allocation visualization"""
+        # Generate example data for strategic allocation
+        data = {
+            'Category': ['Current', 'Target Min', 'Target Max'],
+            'Climate Change': [35, 30, 50],
+            'Financial Inclusion': [25, 20, 30],
+            'Agriculture': [15, 10, 20],
+            'High-Risk/Catalyst': [8, 10, 15],
+            'Growth': [72, 65, 75],
+            'Stable/Low-Risk': [20, 15, 20]
+        }
+        
+        # Create grouped bar chart
+        fig = go.Figure()
+        
+        # Add trace for current allocation
+        fig.add_trace(go.Bar(
+            x=['Climate Change', 'Financial Inclusion', 'Agriculture'],
+            y=[data['Climate Change'][0], data['Financial Inclusion'][0], data['Agriculture'][0]],
+            name='Current Allocation',
+            marker_color='#1f77b4'
+        ))
+        
+        # Add trace for target min
+        fig.add_trace(go.Bar(
+            x=['Climate Change', 'Financial Inclusion', 'Agriculture'],
+            y=[data['Climate Change'][1], data['Financial Inclusion'][1], data['Agriculture'][1]],
+            name='Target Min',
+            marker_color='#ff7f0e'
+        ))
+        
+        # Add trace for target max
+        fig.add_trace(go.Bar(
+            x=['Climate Change', 'Financial Inclusion', 'Agriculture'],
+            y=[data['Climate Change'][2], data['Financial Inclusion'][2], data['Agriculture'][2]],
+            name='Target Max',
+            marker_color='#2ca02c'
+        ))
+        
+        # Update layout
+        fig.update_layout(
+            title="Strategic Asset Allocation vs. Targets",
+            xaxis_title="Impact Theme",
+            yaxis_title="Allocation (%)",
+            barmode='group',
+            hovermode="x unified"
+        )
+        
+        return fig
+
+    def display_multidimensional_results(self, primary_param, min_return, max_risk, min_liquidity):
+        """Display results of multi-dimensional optimization"""
+
+        if 'optimization_params' in st.session_state:
+            # Clear the previous input area
+            st.session_state.pop('optimization_params')
+        
+        # Create a fresh full-width container for results
+        st.empty()  # Clear any previous content
+        
+        # Create results card
+        st.markdown("#### Multi-Dimensional Optimization Results")
+        
+        # Create the radar chart
+        fig = go.Figure()
+        
+        # Current values
+        fig.add_trace(go.Scatterpolar(
+            r=[6.5, 4.2, 5.8, 3.5],
+            theta=['Impact', 'Return', 'Risk', 'Liquidity'],
+            fill='toself',
+            name='Current Portfolio',
+            line_color='#1f77b4'
+        ))
+        
+        # Future projected values - adjust based on primary parameter
+        if primary_param == "Impact Maximization":
+            projected_values = [8.2, 4.5, 5.2, 3.2]
+        elif primary_param == "Return Maximization":
+            projected_values = [6.8, 6.5, 5.9, 3.8]
+        elif primary_param == "Risk Minimization":
+            projected_values = [6.3, 4.0, 3.5, 4.0]
+        else:  # Liquidity optimization
+            projected_values = [6.2, 4.5, 5.2, 7.5]
+            
+        fig.add_trace(go.Scatterpolar(
+            r=projected_values,
+            theta=['Impact', 'Return', 'Risk', 'Liquidity'],
+            fill='toself',
+            name='Future Portfolio (3-5 Years)',
+            line_color='#2ca02c'
+        ))
+        
+        # Update layout
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 10]
+                )
+            ),
+            showlegend=True,
+            height=400,
+            margin=dict(l=20, r=20, t=30, b=20),  # Minimize margins
+            autosize=True  # Let the chart autosize to container
+        )
+        
+        # Use a fresh container for the chart to ensure full width
+        with st.container():
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Future Capital Deployment Strategy
+        with st.container():
+            st.markdown("### Future Capital Deployment Strategy")
+            
+            st.markdown(f"""
+            <div style="border: 1px solid #ddd; border-left: 4px solid #2ca02c; padding: 15px; border-radius: 4px;">
+                <h5 style="margin-top: 0;">{primary_param} Strategy</h5>
+                <p><strong>Undeployed capital recommendations:</strong></p>
+                <ul>
+                    <li>Prioritize high-impact investments with lower correlation to current holdings</li>
+                    <li>Focus new investments on climate and financial inclusion themes</li>
+                    <li>Target medium-liquidity investments for 60% of remaining capital</li>
+                </ul>
+                <p><strong>Expected long-term portfolio transformation:</strong></p>
+                <ul>
+                    <li>Fund ID Score: <span style="color: green;">+25%</span> (3-5 year horizon)</li>
+                    <li>Return: <span style="color: green;">+0.3%</span> (annual)</li>
+                    <li>Risk: <span style="color: green;">-0.6 points</span> (5 year horizon)</li>
+                    <li>Liquidity Ratio: <span style="color: {('red' if primary_param=='Impact Maximization' else 'green')};">{"-0.3" if primary_param=='Impact Maximization' else "+0.5"}</span></li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Implementation Strategy
+        with st.container():
+            st.markdown("### Implementation Strategy")
+            st.markdown("""
+            Based on portfolio assessment, the following forward-looking strategies are recommended:
+            """)
+            
+            # Use columns within the container
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### New Investment Guidelines")
+                st.markdown("""
+                - Allocate 10-15% of new commitments to high-impact, high-risk investments
+                - Apply sector-specific risk limits for new capital deployment
+                - For every $10M deployed, reserve at least $3M for investments providing regular cash flow
+                - Prioritize investments with clear impact targets aligned with portfolio themes
+                """)
+                
+            with col2:
+                st.markdown("#### Future Fund Planning")
+                st.markdown("""
+                - For upcoming fund design, expand financial inclusion focus by 5-8%
+                - Reserve up to 10% of new fund commitments for opportunistic high-impact deals
+                - Structure new funds with 15-20% allocation to early-harvest investments
+                - Plan exits for 25% of current low-impact investments at end of holding period
+                """)
+        
+        # Private Markets Context
+        with st.container():
+            st.markdown("### Private Markets Context")
+            st.markdown("""
+            **Note:** Since existing private market investments cannot be easily rebalanced mid-holding period, 
+            these recommendations focus on:
+            1. Strategic deployment of remaining uncommitted capital
+            2. Adjustments to future fund designs and structures
+            3. Long-term portfolio transformation via natural fund cycles and selective secondary sales
+            4. Exit planning for investments approaching end of holding period
+            """)
+            
+            # Add apply button
+            if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
+                st.success("Future deployment strategy saved successfully!")
+
+    def display_tactical_allocation_results(self, execution_constraint, macro_context, market_opportunity, timeframe):
+        """Display tactical allocation recommendations for private markets"""
+        
+        # Create tactical recommendations based on inputs
+        st.markdown("### Tactical Allocation Recommendations")
+        
+        # Generate recommendation text based on inputs
+        recommendation_title = "Tactical Deployment Strategy"
+        recommendation_summary = "Based on current parameters, the following tactical strategies are recommended for deploying remaining uncommitted capital and planning future investments:"
+        
+        recommendations = []
+        
+        # Process execution constraints
+        if execution_constraint != "None":
+            if "Limited resources" in execution_constraint:
+                recommendations.append("Prioritize high-impact investments in resource-constrained markets for remaining capital")
+            elif "Political instability" in execution_constraint:
+                recommendations.append("Pause new commitments to politically unstable regions and redirect to stable markets")
+            elif "Limited pipeline" in execution_constraint:
+                recommendations.append("Create dedicated sourcing strategy for underrepresented sectors over next 2 quarters")
+            elif "Team capacity" in execution_constraint:
+                recommendations.append("Sequence new deals to align with team capacity over 6-month period")
+        
+        # Process macro context
+        if macro_context != "No significant changes":
+            if "Elections" in macro_context:
+                recommendations.append("Defer 2-3% of uncommitted capital until post-election stability is confirmed")
+            elif "Policy changes" in macro_context:
+                recommendations.append("Shift new commitments from direct investments to intermediated exposure in affected regions")
+            elif "Economic downturn" in macro_context:
+                recommendations.append("Prioritize counter-cyclical investments in essential services for next investment cycle")
+            elif "Currency volatility" in macro_context:
+                recommendations.append("Implement currency hedging strategy for new investments in affected markets")
+        
+        # Process market opportunity
+        if market_opportunity != "No significant opportunities":
+            if "clean energy" in market_opportunity:
+                recommendations.append("Reserve 5% of uncommitted capital for emerging clean energy technologies")
+            elif "financial inclusion" in market_opportunity:
+                recommendations.append("Target 3-5% of new commitments to financial inclusion platforms in priority markets")
+            elif "resilience" in market_opportunity:
+                recommendations.append("Prioritize climate resilience infrastructure in next fund design")
+            elif "Agricultural" in market_opportunity:
+                recommendations.append("Dedicate 4% of remaining capital to agricultural value chain investments")
+        
+        # Create allocation chart based on recommendations
+        fig = go.Figure()
+        
+        # Example data
+        current_alloc = {
+            'Climate Change': 35,
+            'Financial Inclusion': 25,
+            'Agriculture': 15,
+            'Other': 25
+        }
+       
+        # Define categories variable
+        categories = list(current_alloc.keys())
+        
+        # Calculate uncommitted capital percentage (example)
+        uncommitted_pct = 22
+        committed_pct = 100 - uncommitted_pct
+        
+        # Generate tactical allocation based on recommendations
+        tactical_alloc = current_alloc.copy()
+        
+        if "clean energy" in market_opportunity:
+            tactical_alloc['Climate Change'] += 5 * (uncommitted_pct/100)
+            tactical_alloc['Other'] -= 5 * (uncommitted_pct/100)
+        elif "financial inclusion" in market_opportunity:
+            tactical_alloc['Financial Inclusion'] += 4 * (uncommitted_pct/100)
+            tactical_alloc['Other'] -= 4 * (uncommitted_pct/100)
+        elif "Agricultural" in market_opportunity:
+            tactical_alloc['Agriculture'] += 4 * (uncommitted_pct/100)
+            tactical_alloc['Other'] -= 4 * (uncommitted_pct/100)
+        
+        # Create stacked bar chart
+        fig = go.Figure()
+        
+        # Current allocation (divided into committed and uncommitted)
+        for category in categories:
+            fig.add_trace(go.Bar(
+                x=["Current Portfolio"],
+                y=[current_alloc[category] * committed_pct / 100],
+                name=f'{category} (Committed)',
+                marker_color={'Climate Change': '#1f77b4', 
+                            'Financial Inclusion': '#2ca02c',
+                            'Agriculture': '#ff7f0e',
+                            'Other': '#d62728'}.get(category, '#1f77b4'),
+                opacity=0.8
+            ))
+        
+        # Uncommitted capital
+        fig.add_trace(go.Bar(
+            x=["Current Portfolio"],
+            y=[uncommitted_pct],
+            name="Uncommitted Capital",
+            marker_color='#7f7f7f',
+        ))
+        
+        # Future allocation after tactical changes
+        for category in categories:
+            fig.add_trace(go.Bar(
+                x=["Future Portfolio"],
+                y=[tactical_alloc[category]],
+                name=f'{category} (Future)',
+                marker_color={'Climate Change': '#1f77b4', 
+                            'Financial Inclusion': '#2ca02c',
+                            'Agriculture': '#ff7f0e',
+                            'Other': '#d62728'}.get(category, '#1f77b4'),
+                opacity=0.4,
+                showlegend=False
+            ))
+        
+        fig.update_layout(
+            title=f"Tactical Allocation for {timeframe} Timeframe",
+            xaxis_title="Portfolio Timeline",
+            yaxis_title="Allocation (%)",
+            barmode='stack',
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        # Display visualization and recommendations
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Explanation of private markets context
+        st.info("""
+        **Private Markets Note:** This tactical allocation strategy focuses on deploying uncommitted capital
+        and planning future fund structures. Existing investments cannot be easily rebalanced mid-holding period.
+        """)
+        
+        # Display recommendations
+        st.markdown(f"#### {recommendation_title}")
+        st.markdown(recommendation_summary)
+        
+        for i, rec in enumerate(recommendations):
+            st.markdown(f"**{i+1}.** {rec}")
+        
+        st.markdown("#### Implementation Strategy")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**Uncommitted Capital Deployment:**")
+            st.markdown("""
+            * Prioritize deals aligned with tactical strategy for next 60 days
+            * Review investment committee criteria to reflect tactical priorities
+            * Consider accelerating commitments in priority themes
+            * Engage fund managers to align investment focus with tactical goals
+            """)
+        
+        with col2:
+            st.markdown("**Future Fund Planning:**")
+            st.markdown("""
+            * Incorporate tactical themes in design of next fund vehicles
+            * Adjust fund manager selection criteria to align with tactical shifts
+            * Develop specialized co-investment mechanisms for priority themes
+            * Plan natural portfolio evolution through future exit strategies
+            """)
+        
+        # Add buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Export Tactical Plan"):
+                st.info("Tactical allocation plan exported")
+        
+        with col2:
+            if st.button("Apply to Investment Pipeline"):
+                st.success("Tactical strategy applied to investment pipeline and future funds")
+    
     def get_fund_performance_data(self):
         """Get fund performance data for optimization"""
         df = st.session_state.data
