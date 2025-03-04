@@ -1148,7 +1148,7 @@ class ImpactDashboard:
             st.markdown("### Multi-Dimensional Portfolio Construction")
             st.markdown("""
             This integrated approach optimizes your portfolio across four key dimensions simultaneously:
-            **Impact**, **Return**, **Risk**, and **Liquidity**. Based on BII's portfolio construction methodology.
+            **Impact**, **Return**, **Risk**, and **Liquidity**.
             """)
             
             # Store optimization parameters in a form
