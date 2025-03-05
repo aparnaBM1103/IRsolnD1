@@ -1139,6 +1139,7 @@ class ImpactDashboard:
         # Create tabs for different optimization approaches
         optimization_tabs = st.tabs([
             "Multi-Dimensional Optimization", 
+            "Strategic & Tactical Allocation",
             "Public Markets Optimization"
         ])
         
@@ -1249,8 +1250,166 @@ class ImpactDashboard:
                     if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
                         st.success("Future deployment strategy saved successfully!")
                 
+        # Tab 2: Strategic & Tactical Asset Allocation
+        with optimization_tabs[1]:
+            st.markdown("### Strategic & Tactical Asset Allocation")
+            st.markdown("""
+            This tool helps you develop long-term strategic asset allocations while making
+            tactical adjustments to respond to opportunities or portfolio imbalances.
+            """)
+            
+            # Strategic allocation section
+            st.markdown("#### Strategic Asset Allocation")
+            st.markdown("Set target ranges for future portfolio exposure (5-10 year horizon)")
+            
+            # Portfolio stages section
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Portfolio Lifecycle**")
+                
+                # Add committed vs uncommitted visualization
+                uncommitted = st.slider(
+                    "Uncommitted Capital (%)", 
+                    0, 50, 22, 
+                    help="Percentage of total capital that is still uncommitted"
+                )
+                harvest = st.slider(
+                    "Investments in Harvest Stage (%)", 
+                    0, 100, 35, 
+                    help="Percentage of committed investments approaching exit"
+                )
+            
+            with col2:
+                st.markdown("**Investment Horizon**")
+                
+                # Time to deployment
+                deployment_time = st.slider(
+                    "Expected Time to Full Deployment (Years)",
+                    1, 5, 3,
+                    help="Expected time to deploy uncommitted capital"
+                )
+                
+                # Time to next fund
+                next_fund = st.slider(
+                    "Time to Next Fund (Years)",
+                    1, 5, 2,
+                    help="Expected time until next fund launch"
+                )
+            
+            st.markdown("#### Target Allocation Ranges")
+            
+            # Create columns for allocation inputs
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Impact Theme Allocation Ranges**")
+                climate_allocation = st.slider(
+                    "Climate Change", 
+                    0, 100, (30, 50), 
+                    help="Target allocation range for climate change investments"
+                )
+                financial_allocation = st.slider(
+                    "Financial Inclusion", 
+                    0, 100, (20, 30), 
+                    help="Target allocation range for financial inclusion investments"
+                )
+                agriculture_allocation = st.slider(
+                    "Agriculture", 
+                    0, 100, (10, 20), 
+                    help="Target allocation range for agriculture investments"
+                )
+                
+            with col2:
+                st.markdown("**Risk Category Allocation Ranges**")
+                catalyst_allocation = st.slider(
+                    "High-impact/High-risk (Catalyst)", 
+                    0, 100, (10, 15), 
+                    help="Target allocation range for high-impact, high-risk investments"
+                )
+                growth_allocation = st.slider(
+                    "Growth", 
+                    0, 100, (65, 75), 
+                    help="Target allocation range for growth investments"
+                )
+                stable_allocation = st.slider(
+                    "Low-risk/Stable", 
+                    0, 100, (15, 20), 
+                    help="Target allocation range for low-risk investments"
+                )
+                
+            # Strategic visualization
+            strategic_fig = self.create_strategic_allocation_chart()
+            st.plotly_chart(strategic_fig, use_container_width=True)
+            
+            # Tactical allocation section
+            st.markdown("#### Tactical Asset Allocation")
+            st.markdown("Make short-term adjustments to address portfolio imbalances")
+            
+            # Qualitative overlay
+            st.markdown("**Qualitative Factors**")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                execution_constraint = st.selectbox(
+                    "Execution Constraints",
+                    options=[
+                        "None",
+                        "Limited resources in certain markets",
+                        "Political instability in target regions",
+                        "Limited pipeline in certain sectors",
+                        "Team capacity constraints"
+                    ],
+                    index=0
+                )
+                
+                macro_context = st.selectbox(
+                    "Macro Context",
+                    options=[
+                        "No significant changes",
+                        "Elections in key markets",
+                        "Policy changes affecting foreign investment",
+                        "Economic downturn in target regions",
+                        "Currency volatility"
+                    ],
+                    index=0
+                )
+                
+            with col2:
+                market_opportunity = st.selectbox(
+                    "Market Opportunity",
+                    options=[
+                        "No significant opportunities",
+                        "Emerging technologies in clean energy",
+                        "New financial inclusion platforms",
+                        "Climate resilience infrastructure projects",
+                        "Agricultural value chain innovations"
+                    ],
+                    index=0
+                )
+                
+                timeframe = st.selectbox(
+                    "Tactical Timeframe",
+                    options=["3 months", "6 months", "12 months"],
+                    index=1
+                )
+                
+            # Run tactical allocation
+            if st.button("Run Tactical Allocation Analysis", key="run_tactical"):
+                with st.spinner("Analyzing tactical allocation opportunities..."):
+                    # Simulate calculation time
+                    import time
+                    time.sleep(1.5)
+                    
+                    # Show tactical allocation results
+                    self.display_tactical_allocation_results(
+                        execution_constraint, 
+                        macro_context, 
+                        market_opportunity,
+                        timeframe
+                    )
         
-        # Tab 2: Public Markets Optimization Options (preserved for compatibility)
+        # Tab 3: Public Markets Optimization Options (preserved for compatibility)
         with optimization_tabs[2]:
             st.markdown("### Public Markets Optimization Options")
             
@@ -1632,7 +1791,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "Global",
                 "impact_score": 8.7,
-                "expected_return": 10.2,
+                "expected_return": 6.2,
                 "risk_score": 5.4,
                 "liquidity": "Medium (5-7 years)",
                 "size": 175
@@ -1642,7 +1801,7 @@ class ImpactDashboard:
                 "focus": "Agriculture",
                 "geography": "Africa/South Asia",
                 "impact_score": 9.2,
-                "expected_return": 9.8,
+                "expected_return": 5.8,
                 "risk_score": 6.1,
                 "liquidity": "Medium-Long (7-10 years)",
                 "size": 120
@@ -1672,7 +1831,7 @@ class ImpactDashboard:
                 "focus": "Financial Inclusion",
                 "geography": "Africa",
                 "impact_score": 8.3,
-                "expected_return": 8.8,
+                "expected_return": 6.8,
                 "risk_score": 5.2,
                 "liquidity": "Medium (5-7 years)",
                 "size": 80
@@ -1682,7 +1841,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "South Asia",
                 "impact_score": 8.8,
-                "expected_return": 9.5,
+                "expected_return": 7.5,
                 "risk_score": 4.3,
                 "liquidity": "Medium-Long (7-10 years)",
                 "size": 220
@@ -1692,7 +1851,7 @@ class ImpactDashboard:
                 "focus": "Agriculture",
                 "geography": "Africa",
                 "impact_score": 8.1,
-                "expected_return": 11.9,
+                "expected_return": 6.9,
                 "risk_score": 5.8,
                 "liquidity": "Medium (5-7 years)",
                 "size": 110
@@ -1702,7 +1861,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "Global",
                 "impact_score": 9.3,
-                "expected_return": 7.1,
+                "expected_return": 6.1,
                 "risk_score": 6.2,
                 "liquidity": "Long (8+ years)",
                 "size": 185
