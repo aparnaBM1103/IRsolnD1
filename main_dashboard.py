@@ -1791,7 +1791,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "Global",
                 "impact_score": 8.7,
-                "expected_return": 6.2,
+                "expected_return": 10.2,
                 "risk_score": 5.4,
                 "liquidity": "Medium (5-7 years)",
                 "size": 175
@@ -1801,7 +1801,7 @@ class ImpactDashboard:
                 "focus": "Agriculture",
                 "geography": "Africa/South Asia",
                 "impact_score": 9.2,
-                "expected_return": 5.8,
+                "expected_return": 9.8,
                 "risk_score": 6.1,
                 "liquidity": "Medium-Long (7-10 years)",
                 "size": 120
@@ -1831,7 +1831,7 @@ class ImpactDashboard:
                 "focus": "Financial Inclusion",
                 "geography": "Africa",
                 "impact_score": 8.3,
-                "expected_return": 6.8,
+                "expected_return": 8.8,
                 "risk_score": 5.2,
                 "liquidity": "Medium (5-7 years)",
                 "size": 80
@@ -1841,7 +1841,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "South Asia",
                 "impact_score": 8.8,
-                "expected_return": 7.5,
+                "expected_return": 9.5,
                 "risk_score": 4.3,
                 "liquidity": "Medium-Long (7-10 years)",
                 "size": 220
@@ -1851,7 +1851,7 @@ class ImpactDashboard:
                 "focus": "Agriculture",
                 "geography": "Africa",
                 "impact_score": 8.1,
-                "expected_return": 6.9,
+                "expected_return": 11.9,
                 "risk_score": 5.8,
                 "liquidity": "Medium (5-7 years)",
                 "size": 110
@@ -1861,7 +1861,7 @@ class ImpactDashboard:
                 "focus": "Climate Change",
                 "geography": "Global",
                 "impact_score": 9.3,
-                "expected_return": 6.1,
+                "expected_return": 7.1,
                 "risk_score": 6.2,
                 "liquidity": "Long (8+ years)",
                 "size": 185
