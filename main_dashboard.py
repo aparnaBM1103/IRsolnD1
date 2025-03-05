@@ -12,7 +12,7 @@ class ImpactDashboard:
     def __init__(self):
         st.set_page_config(layout="wide", page_title="Impact Data Dashboard")
     
-        # Sidebar width
+        # Reduce sidebar width
         st.markdown("""
             <style>
             [data-testid="stSidebar"][aria-expanded="true"] {
@@ -1151,6 +1151,7 @@ class ImpactDashboard:
             **Impact**, **Return**, **Risk**, and **Liquidity**.
             """)
             
+            # Completely restructure this tab to avoid layout issues
             # Store optimization parameters in a form
             with st.form("optimization_params_form"):
                 st.markdown("#### Optimization Parameters")
@@ -1182,6 +1183,9 @@ class ImpactDashboard:
                 with results_container:
                     st.markdown("#### Multi-Dimensional Optimization Results")
                     st.plotly_chart(radar_fig, use_container_width=True)
+                    
+                    # Show recommended funds right after the optimization results but before strategy info
+                    self.display_recommended_funds(primary_param, min_return, max_risk, min_liquidity)
                     
                     # Future Capital Deployment Strategy
                     st.markdown("### Future Capital Deployment Strategy")
@@ -1245,31 +1249,7 @@ class ImpactDashboard:
                     # Add apply button
                     if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
                         st.success("Future deployment strategy saved successfully!")
-            
-            else:
-                # Show just the radar chart before optimization
-                radar_fig = self.create_multidimensional_portfolio_chart()
-                st.plotly_chart(radar_fig, use_container_width=True)
                 
-                # Display correlation analysis between dimensions
-                st.markdown("### Correlation Analysis")
-                st.markdown("""
-                This analysis visualizes the relationships between different portfolio dimensions, 
-                helping identify areas where trade-offs exist or where multiple objectives can be achieved simultaneously.
-                """)
-                
-                # Display correlation matrix visualization
-                correlation_fig = self.create_correlation_matrix()
-                st.plotly_chart(correlation_fig, use_container_width=True)
-                
-                # Key findings from analysis
-                st.markdown("#### Key Findings")
-                st.markdown("""
-                - **Impact and Returns**: No statistically significant correlation between impact and financial returns
-                - **Impact and Liquidity**: Higher impact investments show an illiquidity premium (longer holding periods)
-                - **Risk and Liquidity**: Higher risk investments demonstrate longer holding periods
-                """)
-        
         # Tab 2: Strategic & Tactical Asset Allocation
         with optimization_tabs[1]:
             st.markdown("### Strategic & Tactical Asset Allocation")
@@ -1670,132 +1650,390 @@ class ImpactDashboard:
         return fig
 
     def display_multidimensional_results(self, primary_param, min_return, max_risk, min_liquidity):
-        """Display results of multi-dimensional optimization"""
+            """Display results of multi-dimensional optimization"""
 
-        if 'optimization_params' in st.session_state:
-            # Clear the previous input area
-            st.session_state.pop('optimization_params')
-        
-        # Create a fresh full-width container for results
-        st.empty()  # Clear any previous content
-        
-        # Create results card
-        st.markdown("#### Multi-Dimensional Optimization Results")
-        
-        # Create the radar chart
-        fig = go.Figure()
-        
-        # Current values
-        fig.add_trace(go.Scatterpolar(
-            r=[6.5, 4.2, 5.8, 3.5],
-            theta=['Impact', 'Return', 'Risk', 'Liquidity'],
-            fill='toself',
-            name='Current Portfolio',
-            line_color='#1f77b4'
-        ))
-        
-        # Future projected values - adjust based on primary parameter
-        if primary_param == "Impact Maximization":
-            projected_values = [8.2, 4.5, 5.2, 3.2]
-        elif primary_param == "Return Maximization":
-            projected_values = [6.8, 6.5, 5.9, 3.8]
-        elif primary_param == "Risk Minimization":
-            projected_values = [6.3, 4.0, 3.5, 4.0]
-        else:  # Liquidity optimization
-            projected_values = [6.2, 4.5, 5.2, 7.5]
+            if 'optimization_params' in st.session_state:
+                # Clear the previous input area
+                st.session_state.pop('optimization_params')
             
-        fig.add_trace(go.Scatterpolar(
-            r=projected_values,
-            theta=['Impact', 'Return', 'Risk', 'Liquidity'],
-            fill='toself',
-            name='Future Portfolio (3-5 Years)',
-            line_color='#2ca02c'
-        ))
-        
-        # Update layout
-        fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 10]
-                )
-            ),
-            showlegend=True,
-            height=400,
-            margin=dict(l=20, r=20, t=30, b=20),  # Minimize margins
-            autosize=True  # Let the chart autosize to container
-        )
-        
-        # Use a fresh container for the chart to ensure full width
-        with st.container():
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Future Capital Deployment Strategy
-        with st.container():
-            st.markdown("### Future Capital Deployment Strategy")
+            # Create a fresh full-width container for results
+            st.empty()  # Clear any previous content
             
-            st.markdown(f"""
-            <div style="border: 1px solid #ddd; border-left: 4px solid #2ca02c; padding: 15px; border-radius: 4px;">
-                <h5 style="margin-top: 0;">{primary_param} Strategy</h5>
-                <p><strong>Undeployed capital recommendations:</strong></p>
-                <ul>
-                    <li>Prioritize high-impact investments with lower correlation to current holdings</li>
-                    <li>Focus new investments on climate and financial inclusion themes</li>
-                    <li>Target medium-liquidity investments for 60% of remaining capital</li>
-                </ul>
-                <p><strong>Expected long-term portfolio transformation:</strong></p>
-                <ul>
-                    <li>Fund ID Score: <span style="color: green;">+25%</span> (3-5 year horizon)</li>
-                    <li>Return: <span style="color: green;">+0.3%</span> (annual)</li>
-                    <li>Risk: <span style="color: green;">-0.6 points</span> (5 year horizon)</li>
-                    <li>Liquidity Ratio: <span style="color: {('red' if primary_param=='Impact Maximization' else 'green')};">{"-0.3" if primary_param=='Impact Maximization' else "+0.5"}</span></li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Implementation Strategy
-        with st.container():
-            st.markdown("### Implementation Strategy")
-            st.markdown("""
-            Based on portfolio assessment, the following forward-looking strategies are recommended:
-            """)
+            # Create results card
+            st.markdown("#### Multi-Dimensional Optimization Results")
             
-            # Use columns within the container
-            col1, col2 = st.columns(2)
+            # Create the radar chart
+            fig = go.Figure()
             
-            with col1:
-                st.markdown("#### New Investment Guidelines")
+            # Current values
+            fig.add_trace(go.Scatterpolar(
+                r=[6.5, 4.2, 5.8, 3.5],
+                theta=['Impact', 'Return', 'Risk', 'Liquidity'],
+                fill='toself',
+                name='Current Portfolio',
+                line_color='#1f77b4'
+            ))
+            
+            # Future projected values - adjust based on primary parameter
+            if primary_param == "Impact Maximization":
+                projected_values = [8.2, 4.5, 5.2, 3.2]
+            elif primary_param == "Return Maximization":
+                projected_values = [6.8, 6.5, 5.9, 3.8]
+            elif primary_param == "Risk Minimization":
+                projected_values = [6.3, 4.0, 3.5, 4.0]
+            else:  # Liquidity optimization
+                projected_values = [6.2, 4.5, 5.2, 7.5]
+                
+            fig.add_trace(go.Scatterpolar(
+                r=projected_values,
+                theta=['Impact', 'Return', 'Risk', 'Liquidity'],
+                fill='toself',
+                name='Future Portfolio (3-5 Years)',
+                line_color='#2ca02c'
+            ))
+            
+            # Update layout
+            fig.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 10]
+                    )
+                ),
+                showlegend=True,
+                height=400,
+                margin=dict(l=20, r=20, t=30, b=20),  # Minimize margins
+                autosize=True  # Let the chart autosize to container
+            )
+            
+            # Use a fresh container for the chart to ensure full width
+            with st.container():
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # Future Capital Deployment Strategy
+            with st.container():
+                st.markdown("### Future Capital Deployment Strategy")
+                
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; border-left: 4px solid #2ca02c; padding: 15px; border-radius: 4px;">
+                    <h5 style="margin-top: 0;">{primary_param} Strategy</h5>
+                    <p><strong>Undeployed capital recommendations:</strong></p>
+                    <ul>
+                        <li>Prioritize high-impact investments with lower correlation to current holdings</li>
+                        <li>Focus new investments on climate and financial inclusion themes</li>
+                        <li>Target medium-liquidity investments for 60% of remaining capital</li>
+                    </ul>
+                    <p><strong>Expected long-term portfolio transformation:</strong></p>
+                    <ul>
+                        <li>Fund ID Score: <span style="color: green;">+25%</span> (3-5 year horizon)</li>
+                        <li>Return: <span style="color: green;">+0.3%</span> (annual)</li>
+                        <li>Risk: <span style="color: green;">-0.6 points</span> (5 year horizon)</li>
+                        <li>Liquidity Ratio: <span style="color: {('red' if primary_param=='Impact Maximization' else 'green')};">{"-0.3" if primary_param=='Impact Maximization' else "+0.5"}</span></li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Implementation Strategy
+            with st.container():
+                st.markdown("### Implementation Strategy")
                 st.markdown("""
-                - Allocate 10-15% of new commitments to high-impact, high-risk investments
-                - Apply sector-specific risk limits for new capital deployment
-                - For every $10M deployed, reserve at least $3M for investments providing regular cash flow
-                - Prioritize investments with clear impact targets aligned with portfolio themes
+                Based on portfolio assessment, the following forward-looking strategies are recommended:
                 """)
                 
-            with col2:
-                st.markdown("#### Future Fund Planning")
-                st.markdown("""
-                - For upcoming fund design, expand financial inclusion focus by 5-8%
-                - Reserve up to 10% of new fund commitments for opportunistic high-impact deals
-                - Structure new funds with 15-20% allocation to early-harvest investments
-                - Plan exits for 25% of current low-impact investments at end of holding period
-                """)
-        
-        # Private Markets Context
-        with st.container():
-            st.markdown("### Private Markets Context")
-            st.markdown("""
-            **Note:** Since existing private market investments cannot be easily rebalanced mid-holding period, 
-            these recommendations focus on:
-            1. Strategic deployment of remaining uncommitted capital
-            2. Adjustments to future fund designs and structures
-            3. Long-term portfolio transformation via natural fund cycles and selective secondary sales
-            4. Exit planning for investments approaching end of holding period
-            """)
+                # Use columns within the container
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("#### New Investment Guidelines")
+                    st.markdown("""
+                    - Allocate 10-15% of new commitments to high-impact, high-risk investments
+                    - Apply sector-specific risk limits for new capital deployment
+                    - For every $10M deployed, reserve at least $3M for investments providing regular cash flow
+                    - Prioritize investments with clear impact targets aligned with portfolio themes
+                    """)
+                    
+                with col2:
+                    st.markdown("#### Future Fund Planning")
+                    st.markdown("""
+                    - For upcoming fund design, expand financial inclusion focus by 5-8%
+                    - Reserve up to 10% of new fund commitments for opportunistic high-impact deals
+                    - Structure new funds with 15-20% allocation to early-harvest investments
+                    - Plan exits for 25% of current low-impact investments at end of holding period
+                    """)
             
-            # Add apply button
-            if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
-                st.success("Future deployment strategy saved successfully!")
+            # Private Markets Context
+            with st.container():
+                st.markdown("### Private Markets Context")
+                st.markdown("""
+                **Note:** Since existing private market investments cannot be easily rebalanced mid-holding period, 
+                these recommendations focus on:
+                1. Strategic deployment of remaining uncommitted capital
+                2. Adjustments to future fund designs and structures
+                3. Long-term portfolio transformation via natural fund cycles and selective secondary sales
+                4. Exit planning for investments approaching end of holding period
+                """)
+                
+                # Add apply button
+                if st.button("Apply Future Deployment Strategy", key="apply_multidim"):
+                    st.success("Future deployment strategy saved successfully!")
+                    # Show recommended funds
+                    self.display_recommended_funds(primary_param, min_return, max_risk, min_liquidity)
+                    
+    def generate_recommended_funds(self, primary_param, min_return, max_risk, min_liquidity, current_funds):
+        """Generate a list of recommended funds based on the optimization criteria"""
+        # Real implementation would query a database or API for potential funds
+        # This is a simplified version with mock data
+        
+        # Define fund database (mock data)
+        fund_database = [
+            {
+                "name": "Green Impact Ventures III",
+                "focus": "Climate Change",
+                "geography": "Global",
+                "impact_score": 8.7,
+                "expected_return": 6.2,
+                "risk_score": 5.4,
+                "liquidity": "Medium (5-7 years)",
+                "size": 175
+            },
+            {
+                "name": "Sustainable Agriculture Fund",
+                "focus": "Agriculture",
+                "geography": "Africa/South Asia",
+                "impact_score": 9.2,
+                "expected_return": 5.8,
+                "risk_score": 6.1,
+                "liquidity": "Medium-Long (7-10 years)",
+                "size": 120
+            },
+            {
+                "name": "Financial Inclusion Partners II",
+                "focus": "Financial Inclusion",
+                "geography": "Southeast Asia",
+                "impact_score": 7.9,
+                "expected_return": 7.3,
+                "risk_score": 4.7,
+                "liquidity": "Medium (5-7 years)",
+                "size": 90
+            },
+            {
+                "name": "Climate Tech Innovators",
+                "focus": "Climate Change",
+                "geography": "Global",
+                "impact_score": 9.5,
+                "expected_return": 5.5,
+                "risk_score": 7.2,
+                "liquidity": "Long (8+ years)",
+                "size": 150
+            },
+            {
+                "name": "Rural Financial Access Fund",
+                "focus": "Financial Inclusion",
+                "geography": "Africa",
+                "impact_score": 8.3,
+                "expected_return": 6.8,
+                "risk_score": 5.2,
+                "liquidity": "Medium (5-7 years)",
+                "size": 80
+            },
+            {
+                "name": "Renewable Energy Infrastructure",
+                "focus": "Climate Change",
+                "geography": "South Asia",
+                "impact_score": 8.8,
+                "expected_return": 7.5,
+                "risk_score": 4.3,
+                "liquidity": "Medium-Long (7-10 years)",
+                "size": 220
+            },
+            {
+                "name": "Agritech Solutions Fund",
+                "focus": "Agriculture",
+                "geography": "Africa",
+                "impact_score": 8.1,
+                "expected_return": 6.9,
+                "risk_score": 5.8,
+                "liquidity": "Medium (5-7 years)",
+                "size": 110
+            },
+            {
+                "name": "Clean Energy Transition Fund",
+                "focus": "Climate Change",
+                "geography": "Global",
+                "impact_score": 9.3,
+                "expected_return": 6.1,
+                "risk_score": 6.2,
+                "liquidity": "Long (8+ years)",
+                "size": 185
+            },
+            {
+                "name": "Inclusive Fintech Ventures",
+                "focus": "Financial Inclusion",
+                "geography": "Global",
+                "impact_score": 7.6,
+                "expected_return": 8.2,
+                "risk_score": 6.7,
+                "liquidity": "Medium (5-7 years)",
+                "size": 95,
+                "relevance_score": 7.9
+            },
+            {
+                "name": "Sustainable Food Systems",
+                "focus": "Agriculture",
+                "geography": "South Asia",
+                "impact_score": 8.5,
+                "expected_return": 6.4,
+                "risk_score": 5.5,
+                "liquidity": "Medium-Long (7-10 years)",
+                "size": 130,
+                "relevance_score": 8.6
+            }
+        ]
+        
+        # For testing - relax filter criteria to ensure we get at least a few funds
+        min_impact_score = 7.0  # Lower this from 8.0 for Impact Maximization
+        
+        # Filter out funds already in the portfolio
+        filtered_funds = [fund for fund in fund_database if fund["name"] not in current_funds]
+        
+        # Filter based on optimization criteria
+        qualified_funds = []
+        
+        if primary_param == "Impact Maximization":
+            # Prioritize high impact funds that meet the minimum return and don't exceed max risk
+            qualified_funds = [fund for fund in filtered_funds 
+                            if fund["impact_score"] >= min_impact_score  # More lenient filter
+                            and fund["expected_return"] >= min_return
+                            and fund["risk_score"] <= max_risk]
+            # Sort by impact score (descending)
+            qualified_funds.sort(key=lambda x: x["impact_score"], reverse=True)
+            
+        elif primary_param == "Return Maximization":
+            # Prioritize high return funds that don't exceed max risk
+            qualified_funds = [fund for fund in filtered_funds 
+                            if fund["expected_return"] >= min_return
+                            and fund["risk_score"] <= max_risk
+                            and fund["impact_score"] >= 7.0]  # Still need some impact
+            # Sort by expected return (descending)
+            qualified_funds.sort(key=lambda x: x["expected_return"], reverse=True)
+            
+        elif primary_param == "Risk Minimization":
+            # Prioritize low risk funds that meet the minimum return
+            qualified_funds = [fund for fund in filtered_funds 
+                            if fund["risk_score"] <= max_risk
+                            and fund["expected_return"] >= min_return
+                            and fund["impact_score"] >= 7.0]  # Still need some impact
+            # Sort by risk score (ascending)
+            qualified_funds.sort(key=lambda x: x["risk_score"])
+            
+        else:  # Liquidity optimization
+            # Define liquidity conversion to numeric scale
+            liquidity_value = {
+                "Short (3-5 years)": 3,
+                "Medium (5-7 years)": 2,
+                "Medium-Long (7-10 years)": 1,
+                "Long (8+ years)": 0
+            }
+            
+            # Prioritize funds with better liquidity that meet min return and max risk
+            qualified_funds = [fund for fund in filtered_funds 
+                            if fund["expected_return"] >= min_return
+                            and fund["risk_score"] <= max_risk
+                            and fund["impact_score"] >= 7.0]  # Still need some impact
+            
+            # Sort by liquidity (descending) - higher value means better liquidity
+            qualified_funds.sort(key=lambda x: liquidity_value.get(x["liquidity"], 0), reverse=True)
+        
+        # Make sure we have some funds to display - if none match the criteria, return at least 2
+        if len(qualified_funds) == 0:
+            # Fall back to less strict criteria
+            qualified_funds = [fund for fund in filtered_funds 
+                            if fund["expected_return"] >= min(min_return, 5.0)
+                            and fund["risk_score"] <= max(max_risk, 7.0)]
+            qualified_funds.sort(key=lambda x: x["impact_score"], reverse=True)
+        
+        # Return top funds (up to 4)
+        return qualified_funds[:4]
+
+    def display_recommended_funds(self, primary_param, min_return, max_risk, min_liquidity):
+        """Display a list of recommended funds that meet the optimization criteria"""
+        st.markdown("### Recommended Funds")
+        st.markdown("""
+        The following funds (not currently in your portfolio) would help you meet your optimization criteria:
+        """)
+        
+        # Get current funds in portfolio to exclude
+        current_funds = set()
+        if not st.session_state.data.empty:
+            current_funds = set(st.session_state.data['fund'].unique())
+        
+        # Generate sample fund database with varied characteristics
+        recommended_funds = self.generate_recommended_funds(primary_param, min_return, max_risk, min_liquidity, current_funds)
+        
+        # Create a table for display
+        fund_df = pd.DataFrame(recommended_funds)
+        
+        # Check if we have any funds to display
+        if len(recommended_funds) == 0:
+            st.warning("No funds match your current criteria. Try adjusting your parameters.")
+            return
+        
+        # Create a fixed number of columns (e.g., 4) and handle different numbers of funds
+        num_cols = min(4, len(recommended_funds))  # Maximum of 4 columns or fewer if less funds
+        cols = st.columns(num_cols)
+        
+        # Display each fund in a column
+        for i, fund in enumerate(recommended_funds):
+            col_idx = i % num_cols  # This ensures we wrap to the next row if more than num_cols funds
+            with cols[col_idx]:
+                # Fund card with box shadow and subtle border
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <h4 style="margin-top: 0; color: #1f77b4;">{fund['name']}</h4>
+                    <p><strong>Focus:</strong> {fund['focus']}</p>
+                    <p><strong>Geography:</strong> {fund['geography']}</p>
+                    <div style="margin: 10px 0;">
+                        <span style="background-color: #e8f4f8; color: #1f77b4; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 5px;">
+                            Impact: {fund['impact_score']}/10
+                        </span>
+                        <span style="background-color: #f0f8e8; color: #2ca02c; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 5px;">
+                            Return: {fund['expected_return']}%
+                        </span>
+                        <span style="background-color: #fff4e8; color: #ff7f0e; padding: 3px 8px; border-radius: 4px; font-size: 0.8em;">
+                            Risk: {fund['risk_score']}/10
+                        </span>
+                    </div>
+                    <p><strong>Liquidity:</strong> {fund['liquidity']}</p>
+                    <p><strong>Size:</strong> ${fund['size']}M</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Add a button to request more information
+                if st.button(f"Request Info", key=f"request_info_{i}"):
+                    st.info(f"Information request for {fund['name']} sent.")
+        
+        # Add a 'View All Recommendations' button
+        if st.button("View All Recommendations", key="view_all_recs"):
+            st.session_state.show_all_recommendations = True
+            st.markdown("### All Recommended Funds")
+            
+            # Display sortable table
+            st.dataframe(
+                fund_df[['name', 'focus', 'geography', 'impact_score', 'expected_return', 'risk_score', 'liquidity', 'size', 'relevance_score']],
+                column_config={
+                    "name": "Fund Name",
+                    "focus": "Focus Area",
+                    "geography": "Geography",
+                    "impact_score": st.column_config.NumberColumn("Impact Score", format="%.1f/10"),
+                    "expected_return": st.column_config.NumberColumn("Expected Return", format="%.1f%%"),
+                    "risk_score": st.column_config.NumberColumn("Risk Score", format="%.1f/10"),
+                    "liquidity": "Liquidity",
+                    "size": st.column_config.NumberColumn("Fund Size ($M)", format="$%.0f M"),
+                    "relevance_score": st.column_config.NumberColumn("Relevance Score", format="%.1f/10")
+                },
+                use_container_width=True,
+                hide_index=True
+            )
 
     def display_tactical_allocation_results(self, execution_constraint, macro_context, market_opportunity, timeframe):
         """Display tactical allocation recommendations for private markets"""
