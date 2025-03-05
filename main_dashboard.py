@@ -1139,7 +1139,6 @@ class ImpactDashboard:
         # Create tabs for different optimization approaches
         optimization_tabs = st.tabs([
             "Multi-Dimensional Optimization", 
-            "Strategic & Tactical Allocation",
             "Public Markets Optimization"
         ])
         
